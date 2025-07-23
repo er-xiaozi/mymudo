@@ -49,11 +49,12 @@ void Channel::handleEvent(Timestamp receiveTime)
         {
             handleEventWithGuard(receiveTime);
         }
-        else
-        {
-            handleEventWithGuard(receiveTime);
-        }
     }
+    else
+    {
+        handleEventWithGuard(receiveTime);
+    }
+    
 }
 
 // 根据收到的事件，执行相应的回调

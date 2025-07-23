@@ -5,9 +5,9 @@
 
 namespace CurrentThread
 {
-    extern __thread int t_cachedTid;
+    extern __thread int t_cachedTid;    //每个线程独立拥有 t_cachedTid 的副本，互不干扰。
 
-    void cacheTid();
+    void cacheTid();    //获取当前线程的 TID 并缓存到 t_cachedTid 中。
 
     inline int tid()
     {
