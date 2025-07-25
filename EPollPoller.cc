@@ -5,6 +5,7 @@
 #include <errno.h>
 #include <unistd.h>//
 #include <cstring>
+//#include <strings.h> bzero()
 
 const int kNew = -1;    // 表示epoll的状态  channel 未添加到poller中
 const int kAdded = 1;   // 未添加
@@ -28,12 +29,41 @@ EPollPoller::~EPollPoller()
 
 Timestamp EPollPoller::poll(int timeoutMs, ChannelList *activeChannels)
 {
+    // 实际上应该用LOG_DEBUG输出更合理
+    LOG_INFO("func=%s => fd total count:%lu\n", __FUNCTION__, channels_.size());
 
+    int numEvents = ::epoll_wait(epollfd_, &*events_.begin(), static_cast<int>(events_.size()), timeoutMs);
+    int savedErrno = errno;
+    Timestamp now(Timestamp::now());
+
+    if(numEvents > 0)
+    {
+        LOG_INFO("%d events happened \n", numEvents);
+        // 
+        fillAciveChannels(numEvents, activeChannels);
+        if(numEvents == events_.size())
+        {
+            events_.resize(events_.size()*2);
+        }
+    }
+    else if(numEvents == 0) //超时
+    {
+        LOG_INFO("%s timeout \n", __FUNCTION__);
+    }
+    else    // 发生错误
+    {
+        if(savedErrno != EINTR)
+        {
+            errno = savedErrno;
+            LOG_ERROR("EPollPoller::poll() err!");
+        }
+    }
+    return now;
 }
 void EPollPoller::updateChannel(Channel *channel) 
 {
     const int index = channel->index();
-    LOG_INFO("fd=%d events=%d index=%d \n", channel->fd(), channel->events(), index);
+    LOG_INFO("func=%s => fd=%d events=%d index=%d \n", __FUNCTION__, channel->fd(), channel->events(), index);
     if(index == kNew || index == kDeleted)  // 如果未添加或已删除
     {
         if(index == kNew)
@@ -64,7 +94,7 @@ void EPollPoller::removeChannel(Channel *channel)
 {
     int fd = channel->fd();
     channels_.erase(fd);
-
+    LOG_INFO("func=%s => fd=%d \n", __FUNCTION__, fd);
     int index = channel->index();
     if(index == kAdded)
     {
@@ -74,12 +104,21 @@ void EPollPoller::removeChannel(Channel *channel)
 }
 
 // 填写活跃的连接
-void EPollPoller::fillAciveChannels(int numEvents, ChannelList *activeChannels) const{}
+void EPollPoller::fillAciveChannels(int numEvents, ChannelList *activeChannels) const
+{
+    for(int i = 0; i<numEvents; ++i)
+    {
+        Channel *channel = static_cast<Channel*>(events_[i].data.ptr);
+        channel->set_revents(events_[i].events);
+        activeChannels->push_back(channel); // EventLoop就拿到Poller返回的发生所有事件的channel列表了
+    }
+}
 
 // 更新channel通道
 void EPollPoller::update(int operation, Channel *channel)
 {
     epoll_event event;
+    //    bzero(&event, sizeof event);
     memset(&event, 0, sizeof event);
     int fd = channel->fd();
     event.data.fd =fd;

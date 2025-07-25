@@ -52,7 +52,7 @@ EventLoop::EventLoop()
 
 EventLoop::~EventLoop()
 {
-    wakeupChannel_->disableAll();
+    wakeupChannel_->disableAll();   //对所有的事件都不感兴趣
     wakeupChannel_->remove();
     ::close(wakeupFd_);
     t_loopInThisThread = nullptr;
@@ -80,7 +80,7 @@ void EventLoop::loop()
     {
         activeChannels_.clear();
         //监听两类fd   一种是clientfd  一种是wakeupfd
-        pollReturnTime_ = poller_->poll(kPollTimsMs, &activeChannels_);
+        pollReturnTime_ = poller_->poll(kPollTimsMs, &activeChannels_);//发生事件的channel activeChannels_
         for (Channel *channel : activeChannels_)
         {   
             // Poller 监听哪些channel发生事件了，然后上报给eventloop,通知channl处理事件
@@ -128,8 +128,8 @@ void EventLoop::queueInLoop(Functor cb)
         pendingFunctors_.emplace_back(cb);  //直接构造
     }
 
-    // 唤醒相应的执行线程
-    if(!isInLoopThread()|| callingPendingFunctors_)
+    // 唤醒相应的执行线程 callingPendingFunctors_表示当前loop正在执行回调，但是又来了新的回调
+    if(!isInLoopThread() || callingPendingFunctors_)
     {
         wakeup();   //唤醒loop所在线程
     }
@@ -162,11 +162,12 @@ bool EventLoop::hasChannel(Channel *channel)
 
 void EventLoop::doPendingFunctors()
 {
-    std::vector<Functor> functors;
+    std::vector<Functor> functors;  // 使用一个vector放置了所有需要执行的回调
     callingPendingFunctors_ = true;
     {
         std::unique_lock<std::mutex> lock(mutex_);
-        functors.swap(pendingFunctors_);
+        // 把pendingFunctors_中的回调放入局部vector, 并发操作，快速释放锁，方便继续往pendingFunctors_写
+        functors.swap(pendingFunctors_);    
     }
 
     for (const Functor &functor :functors)
