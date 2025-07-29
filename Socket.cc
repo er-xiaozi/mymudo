@@ -6,7 +6,7 @@
 #include <sys/types.h>  //bind
 #include <sys/socket.h> //bind
 #include <netinet/tcp.h>///
-#include <strings.h>
+#include <strings.h>    //bzero
 
 Socket::~Socket()
 {

@@ -32,7 +32,7 @@ public:
 
     void setThreadInitCallback(const ThreadInitCallback &cb) { threadInitCallback_ = cb; }
     void setConnectionCallback(const ConnectionCallback &cb) { connectionCallback_ = cb; }
-    void setMessageCallback(const MessageCallbackk &cb) { messageCallback_ = cb; }
+    void setMessageCallback(const MessageCallback &cb) { messageCallback_ = cb; }
     void setWriteComlepteCallback(const WriteCompleteCallback &cb) { writeCompleteCallback_ = cb; }
 
     void setThreadNum(int numThreads);
@@ -55,7 +55,7 @@ private:
     std::shared_ptr<EventLoopThreadPoll> threadPool_; // one loop per thread
 
     ConnectionCallback connectionCallback_;       // 有新连接时的回调
-    MessageCallbackk messageCallback_;           // 有读写消息时 的回调
+    MessageCallback messageCallback_;           // 有读写消息时 的回调
     WriteCompleteCallback writeCompleteCallback_; // 消息发送完成后的回调
 
     ThreadInitCallback threadInitCallback_; // Loop线程初始化的回调

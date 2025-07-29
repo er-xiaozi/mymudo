@@ -17,7 +17,7 @@ TcpServer::TcpServer(EventLoop *loop,
     const InetAddress &listenAddr,
     const std::string &nameArg,
     Option option)
-    : loop_(ChecLoopNotNull(loop))
+    : loop_(ChecLoopNotNull(loop))  //不接受空指针 mainloop不能为空
     , ipPort_(listenAddr.toIpPort())
     , name_(nameArg)
     , acceptor_(new Acceptor(loop, listenAddr, option==kNoReusePort))

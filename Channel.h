@@ -45,7 +45,7 @@ public:
     void disableWriting() {events_ &=~kWriteEvent; update();}
     void disableAll()  {events_ =kNoneEvent; update();}
 
-    //返回fd当前是事件状态
+    //返回fd当前事件状态
     bool isNoneEvent() const { return events_ == kNoneEvent;}
     bool isWriting() const { return events_ & kWriteEvent;}
     bool isReading() const { return events_ & kReadEvent;}

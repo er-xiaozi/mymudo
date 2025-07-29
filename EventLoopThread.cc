@@ -29,7 +29,7 @@ EventLoop *EventLoopThread::startLoop()
     EventLoop *loop = nullptr;
     {
         std::unique_lock<std::mutex> lock(mutex_);
-        while (loop_ == nullptr)
+        while (loop_ == nullptr)    // 等待loop创建完成后通知
         {
             cond_.wait(lock);
         }

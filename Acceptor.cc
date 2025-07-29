@@ -62,7 +62,7 @@ void Acceptor::handleRead()
     else
     {
         LOG_ERROR("%s:%s:%d  accept err:%d \n", __FILE__, __FUNCTION__, __LINE__, errno);
-        if (errno = EMFILE)
+        if (errno = EMFILE) // 达到当前进程可以打开文件描述符的上限，没有可用fd分配了
         {
             LOG_ERROR("%s:%s:%d sockfd reached limit! \n", __FILE__, __FUNCTION__, __LINE__);
         }

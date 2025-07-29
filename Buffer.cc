@@ -1,6 +1,8 @@
 #include "Buffer.h"
 
 #include <sys/uio.h>
+#include <errno.h>
+#include <unistd.h>
 
 // 从fd上读取数据，  Poller工作在LT模式
 // Buffer缓冲区是有大小的！但是在fd上读数据的时候不知道数据最终大小
@@ -32,5 +34,15 @@ ssize_t Buffer::readFd(int fd, int *saveErrno)
         append(extrabuf, n - writable);
     }
 
+    return n;
+}
+
+ssize_t Buffer::writeFd(int fd, int* saveErrno)
+{
+    ssize_t n = ::write(fd, peek(), readableBytes());
+    if(n < 0)
+    {
+        *saveErrno = errno;
+    }
     return n;
 }
