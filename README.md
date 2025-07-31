@@ -1,5 +1,26 @@
 # mymuduo
 
+查看testserver是否启动
+```
+sudo netstat -tanp
+```
+调试过程出现的问题
+```
+[INFO]print time : func=poll => fd total count:1
+[INFO]print time : poll timeout 
+[INFO]print time : func=poll => fd total count:1
+[INFO]print time : 1 events happened 
+[INFO]print time : channel handleEvent revents:1
+[ERROR]print time : /home/lwj/Desktop/mymuduo/Acceptor.cc:handleRead:64  accept err:22 
+[ERROR]print time : /home/lwj/Desktop/mymuduo/Acceptor.cc:handleRead:67 sockfd reached limit! 
+[INFO]print time : func=poll => fd total count:2
+```
+- accept函数的参数不合法 ，第三个参数必须设置初始化大小socklen_t len = sizeof addr;
+- 对返回的connfd没有设置非阻塞
+```cpp
+int connfd = ::accept(sockfd_, (sockaddr*)&addr, &len);
+int connfd = ::accept4(sockfd_, (sockaddr*)&addr, &len, SOCK_NONBLOCK | SOCK_CLOEXEC); // 设置非阻塞
+```
 #### Channel
 打包fd和感兴趣的事件(打包loop 和 fd)
 

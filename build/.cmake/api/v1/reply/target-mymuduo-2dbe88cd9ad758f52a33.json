@@ -24,7 +24,7 @@
 			{
 				"command" : 0,
 				"file" : 0,
-				"line" : 14,
+				"line" : 17,
 				"parent" : 0
 			}
 		]
@@ -35,7 +35,7 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : " -g -std=c++11 -g -fPIC"
+					"fragment" : " -g -std=c++11 -fPIC"
 				}
 			],
 			"defines" : 

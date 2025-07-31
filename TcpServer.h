@@ -6,6 +6,8 @@
 #include "noncopyable.h"
 #include "EventLoopThreadPool.h"
 #include "Callbacks.h"
+#include "TcpConnection.h"
+#include "Buffer.h"
 
 #include <functional>
 #include <string>
@@ -52,7 +54,7 @@ private:
     const std::string name_;
 
     std::unique_ptr<Acceptor> acceptor_;               // 运行在mainLoop, 监听新连接事件
-    std::shared_ptr<EventLoopThreadPoll> threadPool_; // one loop per thread
+    std::shared_ptr<EventLoopThreadPool> threadPool_; // one loop per thread
 
     ConnectionCallback connectionCallback_;       // 有新连接时的回调
     MessageCallback messageCallback_;           // 有读写消息时 的回调
@@ -62,5 +64,5 @@ private:
     std::atomic_int started_;
 
     int nextConnId_;
-    ConnectionMap connetions_; // 保存所有的连接
+    ConnectionMap connections_; // 保存所有的连接
 };
