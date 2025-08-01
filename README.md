@@ -1,10 +1,26 @@
 # mymuduo
-
-查看testserver是否启动
+使用C++11 移植muduo网络库，使其不再依赖boost库。
+## 使用方法
+### 编译安装
+使用autobuild.sh可以一键编译安装
+```
+sudo ./sutobuild.sh
+```
+### 测试安装
+example文件夹中提供了一个使用示例testserver，按照下面步骤编译运行示例
+```
+cd example
+sudo make clean && make
+./testserver
+```
+查看testserver是否启动，若成功启动代表编译安装成功
 ```
 sudo netstat -tanp
 ```
-调试过程出现的问题
+
+## 下面是开发过程中的记录
+### 调试过程
+连接testserver出现下面输出
 ```
 [INFO]print time : func=poll => fd total count:1
 [INFO]print time : poll timeout 
@@ -15,8 +31,11 @@ sudo netstat -tanp
 [ERROR]print time : /home/lwj/Desktop/mymuduo/Acceptor.cc:handleRead:67 sockfd reached limit! 
 [INFO]print time : func=poll => fd total count:2
 ```
+错误原因
 - accept函数的参数不合法 ，第三个参数必须设置初始化大小socklen_t len = sizeof addr;
 - 对返回的connfd没有设置非阻塞
+  
+修改:
 ```cpp
 int connfd = ::accept(sockfd_, (sockaddr*)&addr, &len);
 int connfd = ::accept4(sockfd_, (sockaddr*)&addr, &len, SOCK_NONBLOCK | SOCK_CLOEXEC); // 设置非阻塞
@@ -194,8 +213,4 @@ std::atomic_int started_;
 int nextConnId_;
 ConnectionMap connetions_; // 保存所有的连接
 ```
-相关接口
 
-
-可能需要修改的地方
-void EPollPoller::update(int operation, Channel *channel) 中的memset 改为bzero
